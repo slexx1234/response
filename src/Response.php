@@ -41,7 +41,7 @@ class Response
     /**
      * Установка заголовков ответа
      * @param Headers|array|string $headers
-     * @return void
+     * @return $this
      */
     public function setHeaders($headers)
     {
@@ -50,16 +50,18 @@ class Response
         } else {
             $this->headers = new Headers($headers);
         }
+        return $this;
     }
 
     /**
      * Установка статуса ответа
      * @param int $status
-     * @return void
+     * @return $this
      */
     public function setStatus($status)
     {
         $this->status = $status;
+        return $this;
     }
 
     /**
@@ -74,11 +76,12 @@ class Response
     /**
      * Установка тела ответа
      * @param string|null $body
-     * @return void
+     * @return $this
      */
     public function setBody($body)
     {
         $this->body = $body;
+        return $this;
     }
 
     /**
@@ -112,10 +115,9 @@ class Response
      */
     public static function redirect($url, $status = 200)
     {
-        $response = new Response();
-        $response->setStatus($status);
-        $response->getHeaders()->set('Location', $url);
-        return $response;
+        return (new Response())
+            ->setStatus($status)
+            ->setHeader('Location', $url);
     }
 
     /**
@@ -126,11 +128,10 @@ class Response
      */
     public static function json($data, $status = 200)
     {
-        $response = new Response();
-        $response->setStatus($status);
-        $response->getHeaders()->set('Content-Type', 'application/json; charset=UTF-8');
-        $response->setBody(json_encode($data, JSON_UNESCAPED_UNICODE));
-        return $response;
+        return (new Response())
+            ->setStatus($status)
+            ->setHeader('Content-Type', 'application/json; charset=UTF-8')
+            ->setBody(json_encode($data, JSON_UNESCAPED_UNICODE));
     }
 
     /**
@@ -141,10 +142,61 @@ class Response
      */
     public static function text($text, $status = 200)
     {
-        $response = new Response();
-        $response->setStatus($status);
-        $response->getHeaders()->set('Content-Type', 'text/plain; charset=UTF-8');
-        $response->setBody($text);
-        return $response;
+        return (new Response())
+            ->setStatus($status)
+            ->setHeader('Content-Type', 'text/plain; charset=UTF-8')
+            ->setBody($text);
+    }
+
+    /**
+     * @param string $html
+     * @param int $status
+     * @return Response
+     */
+    public static function html($html, $status = 200)
+    {
+        return (new Response())
+            ->setStatus($status)
+            ->setHeader('Content-Type', 'text/html; charset=UTF-8')
+            ->setBody($html);
+    }
+
+    /**
+     * @param string $name
+     * @param string $header
+     * @return $this
+     */
+    public function setHeader($name, $header)
+    {
+        $this->headers->set($name, $header);
+        return $this;
+    }
+
+    /**
+     * @param string $name
+     * @return string|null
+     */
+    public function getHeader($name)
+    {
+        return $this->headers->get($name);
+    }
+
+    /**
+     * @param string $name
+     * @return bool
+     */
+    public function hasHeader($name)
+    {
+        return $this->headers->has($name);
+    }
+
+    /**
+     * @param string $name
+     * @return $this
+     */
+    public function removeHeader($name)
+    {
+        $this->headers->remove($name);
+        return $this;
     }
 }
